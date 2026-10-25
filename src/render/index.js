@@ -41,6 +41,15 @@ export function draw(ctx, playerState, playArea, fx) {
   if (!ctx || !playArea) return;
   if (!playerState) return; // guard before the first jump / before boot
 
+  // Everything renders in PLAY-AREA coordinates (the same origin mapTap/
+  // toGameCoords map taps into), offset onto the canvas by (playArea.x,
+  // playArea.y). Before the D-REPAIR-2 offset fix the scene rendered from the
+  // canvas origin, so on wide viewports the visible platform sat far left of
+  // the centered interactive column (input/render origin mismatch). Manual
+  // offsets — no ctx.save/translate/restore — keep draw() allocation-free
+  // (AGENTS.md rule 4).
+  const ox = playArea.x;
+  const oy = playArea.y;
   const { width, height } = playArea;
 
   // Clear the whole canvas (not just the play area — the letterboxed play
@@ -55,19 +64,19 @@ export function draw(ctx, playerState, playArea, fx) {
     ctx.fillStyle = '#4ECDC4';
     const points = fx.trace.count();
     for (let i = 0; i < points; i++) {
-      ctx.fillRect(fx.trace.xAt(i) - 2, fx.trace.yAt(i) - 2, 4, 4);
+      ctx.fillRect(ox + fx.trace.xAt(i) - 2, oy + fx.trace.yAt(i) - 2, 4, 4);
     }
   }
 
   // Ground: bottom strip of the play area.
   ctx.fillStyle = '#1A1A2E';
-  ctx.fillRect(0, height - 16, width, 16);
+  ctx.fillRect(ox, oy + height - 16, width, 16);
 
   // One static platform: centered, tier-1 width (gameplay-spec §4), top at
   // the player's standing height.
   const platformWidth = Math.min(200, width);
-  const platformX = (width - platformWidth) / 2;
-  const platformY = height - 64;
+  const platformX = ox + (width - platformWidth) / 2;
+  const platformY = oy + height - 64;
   ctx.fillStyle = '#FFFFFF';
   ctx.fillRect(platformX, platformY, platformWidth, 12);
   ctx.strokeStyle = '#1A1A2E';
@@ -76,8 +85,8 @@ export function draw(ctx, playerState, playArea, fx) {
 
   // Stand-in character: 24x24 rounded square, #FFD23F with dark outline.
   const size = 24;
-  const charX = playerState.x - size / 2;
-  const charY = playerState.y - size / 2;
+  const charX = ox + playerState.x - size / 2;
+  const charY = oy + playerState.y - size / 2;
   ctx.fillStyle = '#FFD23F';
   ctx.beginPath();
   if (typeof ctx.roundRect === 'function') {
@@ -97,7 +106,7 @@ export function draw(ctx, playerState, playArea, fx) {
     ctx.strokeStyle = '#FF6B6B';
     ctx.lineWidth = 3;
     ctx.beginPath();
-    ctx.arc(playerState.x, playerState.y - 18, 10 + 8 * (1 - t), 0, Math.PI * 2);
+    ctx.arc(ox + playerState.x, oy + playerState.y - 18, 10 + 8 * (1 - t), 0, Math.PI * 2);
     ctx.stroke();
   }
 }
