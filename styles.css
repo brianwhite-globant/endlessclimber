@@ -1,0 +1,28 @@
+/* SPIKE-01 prototype styles (DESIGN-SPEC §6.2: no new UI — gameplay only).
+   Stand-in colors; the release palette and 3:1 contrast are EPIC-10 scope. */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #0b0b1a;
+  overscroll-behavior: none;
+}
+
+#game {
+  display: block;
+  width: 100%;
+  height: 100%;
+  /* Prototype-basic gesture suppression; full FR-59 is EPIC-02 scope (REC-04). */
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
